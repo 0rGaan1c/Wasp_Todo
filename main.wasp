@@ -1,0 +1,69 @@
+app wasp_todo {
+  wasp: {
+    version: "^0.13.2"
+  },
+  title: "Todo App",
+  db: {
+    system: PostgreSQL,
+    // seeds: [
+    //   import { devSeedSimple } from "@src/seed",
+    // ]
+  },
+  auth: {
+    userEntity: User,
+    methods: {
+      usernameAndPassword: {}
+    },
+    onAuthFailedRedirectTo: "/login"
+  }
+}
+
+route RootRoute { path: "/", to: MainPage }
+page MainPage {
+  authRequired: true,
+  component: import { MainPage } from "@src/MainPage",
+}
+
+route SignupRoute {path: "/signup", to: SignupPage}
+page SignupPage {
+  component: import { SignupPage } from "@src/SignupPage"
+}
+
+route LoginRoute { path: "/login", to: LoginPage }
+page LoginPage {
+  component: import { LoginPage } from "@src/LoginPage"
+}
+
+
+
+// entities
+entity Task {=psl
+  id          Int @id @default(autoincrement())
+  description String
+  isDone      Boolean @default(false)
+  user        User?   @relation(fields: [userId], references: [id])
+  userId      Int?
+psl=}
+
+entity User {=psl
+  id       Int    @id @default(autoincrement())
+  tasks    Task[]
+psl=}
+
+
+// queries
+query getTasks {
+  fn: import { getTasks } from "@src/queries",
+  entities: [Task]
+}
+
+// actions
+action createTask {
+  fn: import { createTask } from "@src/actions",
+  entities: [Task]
+}
+
+action updateTask {
+  fn: import { updateTask } from "@src/actions",
+  entities: [Task]
+}
